@@ -8,16 +8,18 @@ function SalonTabs({ salones = [], selectedSalonId, onSelectSalon }) {
   return (
     <div className="salon-tabs" role="tablist" aria-label="Salones">
       {salones.map((salon) => {
-        const isSelected = String(salon.id) === String(selectedSalonId)
+        // Soporte unificado para _id (MongoDB) y id
+        const salonId = salon._id ?? salon.id
+        const isSelected = String(salonId) === String(selectedSalonId)
 
         return (
           <button
-            key={salon.id}
+            key={salonId}
             className={`salon-tabs__tab${isSelected ? ' salon-tabs__tab--active' : ''}`}
             type="button"
             role="tab"
             aria-selected={isSelected}
-            onClick={() => onSelectSalon?.(salon.id)}
+            onClick={() => onSelectSalon?.(salonId)}
           >
             {salon.nombre}
           </button>

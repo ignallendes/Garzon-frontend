@@ -19,7 +19,8 @@ function LoginForm({ onSubmit, error }) {
     setIsSubmitting(true)
 
     try {
-      await onSubmit({ usuario: usuario.trim(), password })
+      // 💡 CAMBIO CLAVE: Cambiamos 'usuario' por 'username' para que coincida con el backend
+      await onSubmit({ username: usuario.trim(), password })
     } finally {
       setIsSubmitting(false)
     }

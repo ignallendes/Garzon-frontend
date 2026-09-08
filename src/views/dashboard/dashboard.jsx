@@ -14,6 +14,7 @@ function Dashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // 1. Cargar Salones
   useEffect(() => {
     let isCurrent = true
 
@@ -26,13 +27,16 @@ function Dashboard() {
         setSalones(salonesCargados)
 
         if (salonesCargados.length > 0) {
-          setSelectedSalonId(String(salonesCargados[0].id))
+          // 💡 SOPORTE PARA _id (MongoDB) e id
+          const idInicial = salonesCargados[0]._id ?? salonesCargados[0].id
+          setSelectedSalonId(String(idInicial))
         } else {
           setIsLoading(false)
         }
       })
-      .catch(() => {
+      .catch((err) => {
         if (isCurrent) {
+          console.error(err)
           setError('No fue posible cargar los salones.')
           setIsLoading(false)
         }
@@ -43,20 +47,23 @@ function Dashboard() {
     }
   }, [])
 
+  // 2. Cargar Mesas por ID de Salón
   useEffect(() => {
-    if (!selectedSalonId) return undefined
+    if (!selectedSalonId || selectedSalonId === 'undefined') return undefined
 
     let isCurrent = true
 
+    // 💡 CAMBIO DE RUTA: `/mesas/${selectedSalonId}` coincide con tu endpoint de Postman
     apiClient
-      .get(`/mesas/salon/${selectedSalonId}`)
+      .get(`/mesas/${selectedSalonId}`)
       .then(({ data }) => {
         if (isCurrent) {
           setMesas(Array.isArray(data) ? data : data.mesas ?? [])
         }
       })
-      .catch(() => {
+      .catch((err) => {
         if (isCurrent) {
+          console.error(err)
           setMesas([])
           setError('No fue posible cargar las mesas del salón.')
         }
@@ -72,30 +79,38 @@ function Dashboard() {
     }
   }, [selectedSalonId])
 
+  // 3. WebSockets
   useEffect(() => {
     const handleCambioEstado = (payload) => {
       const mesaActualizada = payload?.mesa ?? payload
-      const mesaId = mesaActualizada?.id ?? payload?.mesaId ?? payload?.idMesa
+      const mesaId = mesaActualizada?._id ?? mesaActualizada?.id ?? payload?.mesaId
       const estado = mesaActualizada?.estado ?? payload?.nuevoEstado
 
       if (!mesaId || !estado) return
 
       setMesas((mesasActuales) =>
-        mesasActuales.map((mesa) =>
-          String(mesa.id) === String(mesaId) ? { ...mesa, estado } : mesa,
-        ),
+        mesasActuales.map((mesa) => {
+          const idActual = mesa._id ?? mesa.id
+          return String(idActual) === String(mesaId) ? { ...mesa, estado } : mesa
+        }),
       )
-      setSelectedMesa((mesaActual) =>
-        mesaActual && String(mesaActual.id) === String(mesaId)
+      setSelectedMesa((mesaActual) => {
+        if (!mesaActual) return null
+        const idActual = mesaActual._id ?? mesaActual.id
+        return String(idActual) === String(mesaId)
           ? { ...mesaActual, estado }
-          : mesaActual,
-      )
+          : mesaActual
+      })
     }
 
-    socketClient.on('cambio-estado-mesa', handleCambioEstado)
+    if (socketClient) {
+      socketClient.on('cambio-estado-mesa', handleCambioEstado)
+    }
 
     return () => {
-      socketClient.off('cambio-estado-mesa', handleCambioEstado)
+      if (socketClient) {
+        socketClient.off('cambio-estado-mesa', handleCambioEstado)
+      }
     }
   }, [])
 
@@ -107,10 +122,12 @@ function Dashboard() {
   }
 
   const handleMesaActualizada = (mesaActualizada) => {
+    const targetId = mesaActualizada._id ?? mesaActualizada.id
     setMesas((mesasActuales) =>
-      mesasActuales.map((mesa) =>
-        String(mesa.id) === String(mesaActualizada.id) ? mesaActualizada : mesa,
-      ),
+      mesasActuales.map((mesa) => {
+        const idActual = mesa._id ?? mesa.id
+        return String(idActual) === String(targetId) ? mesaActualizada : mesa
+      }),
     )
   }
 
@@ -138,7 +155,7 @@ function Dashboard() {
           <div className="dashboard__grid">
             {mesas.map((mesa) => (
               <MesaCard
-                key={mesa.id}
+                key={mesa._id ?? mesa.id}
                 numeroMesa={mesa.numeroMesa ?? mesa.numero}
                 estado={mesa.estado}
                 onClick={() => setSelectedMesa(mesa)}

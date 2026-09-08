@@ -12,15 +12,22 @@ function MesaActionModal({ mesa, onClose, onEstadoActualizado }) {
     return null
   }
 
+  // 💡 Soporte unificado para _id (MongoDB) y id
+  const mesaId = mesa._id ?? mesa.id
+
   const handleEstadoChange = async (estado) => {
     setError('')
     setIsSubmitting(true)
 
     try {
-      const { data } = await apiClient.patch(`/mesas/${mesa.id}/estado`, { estado })
-      onEstadoActualizado?.({ ...mesa, ...data, estado: data?.estado ?? estado })
+      // Usamos mesaId que garantiza el _id de MongoDB
+      const { data } = await apiClient.patch(`/mesas/${mesaId}/estado`, { estado })
+      
+      const mesaActualizada = { ...mesa, ...data, estado: data?.estado ?? estado }
+      onEstadoActualizado?.(mesaActualizada)
       onClose?.()
-    } catch {
+    } catch (err) {
+      console.error('Error al actualizar estado:', err)
       setError('No fue posible actualizar el estado de la mesa.')
     } finally {
       setIsSubmitting(false)
