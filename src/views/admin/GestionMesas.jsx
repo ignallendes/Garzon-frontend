@@ -1,294 +1,342 @@
-import React, { useState, useEffect } from 'react';
-import apiClient from '../../api/apiClient'; // Ajusta la ruta a tu cliente de axios/fetch
-import './GestionMesas.css';
+import { useCallback, useEffect, useState } from 'react'
+import { apiClient } from '../../api/apiClient'
+import './gestion-mesas.css'
 
-const GestionMesas = () => {
-  const [salones, setSalones] = useState([]);
-  const [salonSeleccionado, setSalonSeleccionado] = useState('');
-  const [mesas, setMesas] = useState([]);
-  
-  // Estado para la creación masiva
-  const [cantidad, setCantidad] = useState(1);
-  
-  // Estados de interfaz
-  const [cargandoSalones, setCargandoSalones] = useState(true);
-  const [cargandoMesas, setCargandoMesas] = useState(false);
-  const [procesando, setProcesando] = useState(false);
-  const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
-  
-  // Modal para ver/imprimir el QR de una mesa
-  const [mesaQR, setMesaQR] = useState(null);
+function getErrorMessage(error, fallback) {
+  return error.response?.data?.message ?? fallback
+}
 
-  // 1. Cargar la lista de salones al montar el componente
-  useEffect(() => {
-    obtenerSalones();
-  }, []);
+function GestionMesas() {
+  const [salones, setSalones] = useState([])
+  const [salonSeleccionado, setSalonSeleccionado] = useState('')
+  const [mesas, setMesas] = useState([])
+  const [cantidad, setCantidad] = useState(1)
 
-  // 2. Cargar las mesas cada vez que cambie el salón seleccionado
-  useEffect(() => {
-    if (salonSeleccionado) {
-      obtenerMesas(salonSeleccionado);
-    } else {
-      setMesas([]);
-    }
-  }, [salonSeleccionado]);
+  const [isLoading, setIsLoading] = useState(true)
+  const [cargandoMesas, setCargandoMesas] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [alerta, setAlerta] = useState(null)
 
-  const mostrarMensaje = (tipo, texto) => {
-    setMensaje({ tipo, texto });
-    setTimeout(() => {
-      setMensaje({ tipo: '', texto: '' });
-    }, 4000);
-  };
+  const [mesaQR, setMesaQR] = useState(null)
 
-  const obtenerSalones = async () => {
-    setCargandoSalones(true);
+  // Cargar salones
+  const loadSalones = useCallback(async () => {
+    setIsLoading(true)
     try {
-      const response = await apiClient.get('/salones');
-      // Maneja tanto { salones: [...] } como array directo [...]
-      const listaSalones = response.data.salones || response.data || [];
-      setSalones(listaSalones);
+      const { data } = await apiClient.get('/salones')
+      const listaSalones = Array.isArray(data) ? data : data.salones ?? []
+      setSalones(listaSalones)
 
-      if (listaSalones.length > 0) {
-        setSalonSeleccionado(listaSalones[0]._id);
+      if (listaSalones.length > 0 && !salonSeleccionado) {
+        setSalonSeleccionado(listaSalones[0]._id ?? listaSalones[0].id)
       }
     } catch (error) {
-      mostrarMensaje('error', error.response?.data?.message || 'Error al obtener la lista de salones');
+      setAlerta({
+        tipo: 'error',
+        texto: getErrorMessage(error, 'No fue posible cargar los salones.'),
+      })
     } finally {
-      setCargandoSalones(false);
+      setIsLoading(false)
     }
-  };
+  }, [salonSeleccionado])
 
-  const obtenerMesas = async (salonId) => {
-    setCargandoMesas(true);
+  // Cargar mesas por salón
+  const loadMesas = useCallback(async (salonId) => {
+    if (!salonId) return
+    setCargandoMesas(true)
+
     try {
-      const response = await apiClient.get(`/mesas/${salonId}`);
-      const listaMesas = response.data.mesas || response.data || [];
-      setMesas(listaMesas);
+      const { data } = await apiClient.get(`/mesas/${salonId}`)
+      setMesas(Array.isArray(data) ? data : data.mesas ?? [])
     } catch (error) {
-      mostrarMensaje('error', error.response?.data?.message || 'Error al obtener las mesas del salón');
+      setAlerta({
+        tipo: 'error',
+        texto: getErrorMessage(error, 'No fue posible cargar las mesas del salón.'),
+      })
     } finally {
-      setCargandoMesas(false);
+      setCargandoMesas(false)
     }
-  };
+  }, [])
 
-  const handleCrearMesas = async (e) => {
-    e.preventDefault();
+  // Carga inicial con prevención de fugas de memoria (isCurrent)
+  useEffect(() => {
+    let isCurrent = true
+
+    apiClient
+      .get('/salones')
+      .then(({ data }) => {
+        if (isCurrent) {
+          const listaSalones = Array.isArray(data) ? data : data.salones ?? []
+          setSalones(listaSalones)
+
+          if (listaSalones.length > 0) {
+            const primerId = listaSalones[0]._id ?? listaSalones[0].id
+            setSalonSeleccionado(primerId)
+            loadMesas(primerId)
+          }
+        }
+      })
+      .catch((error) => {
+        if (isCurrent) {
+          setAlerta({
+            tipo: 'error',
+            texto: getErrorMessage(error, 'No fue posible cargar los salones.'),
+          })
+        }
+      })
+      .finally(() => {
+        if (isCurrent) {
+          setIsLoading(false)
+        }
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [loadMesas])
+
+  // Manejar cambio de salón
+  const handleSalonChange = (event) => {
+    const id = event.target.value
+    setSalonSeleccionado(id)
+    loadMesas(id)
+  }
+
+  // Crear mesas
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+
     if (!salonSeleccionado) {
-      mostrarMensaje('error', 'Selecciona un salón antes de agregar mesas');
-      return;
+      setAlerta({ tipo: 'error', texto: 'Selecciona un salón para agregar mesas.' })
+      return
     }
 
-    if (cantidad < 1) {
-      mostrarMensaje('error', 'La cantidad debe ser al menos 1');
-      return;
+    const numCantidad = Number(cantidad)
+    if (isNaN(numCantidad) || numCantidad < 1) {
+      setAlerta({ tipo: 'error', texto: 'La cantidad debe ser al menos 1.' })
+      return
     }
 
-    setProcesando(true);
+    setAlerta(null)
+    setIsSubmitting(true)
+
     try {
-      const response = await apiClient.post('/mesas', {
-        cantidad: Number(cantidad),
-        salonId: salonSeleccionado
-      });
-
-      mostrarMensaje('exito', response.data.message || 'Mesas creadas exitosamente');
-      setCantidad(1);
-      obtenerMesas(salonSeleccionado);
+      await apiClient.post('/mesas', {
+        cantidad: numCantidad,
+        salonId: salonSeleccionado,
+      })
+      setCantidad(1)
+      setAlerta({ tipo: 'exito', texto: 'Mesas creadas correctamente.' })
+      await loadMesas(salonSeleccionado)
     } catch (error) {
-      mostrarMensaje('error', error.response?.data?.message || 'Error al agregar las mesas');
+      setAlerta({
+        tipo: 'error',
+        texto: getErrorMessage(error, 'No fue posible crear las mesas.'),
+      })
     } finally {
-      setProcesando(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
-  const handleEliminarMesa = async (mesaId, numero) => {
-    const confirmacion = window.confirm(`¿Estás seguro de que deseas eliminar la Mesa #${numero}?`);
-    if (!confirmacion) return;
+  // Eliminar mesa
+  const handleDelete = async (mesa) => {
+    const mesaId = mesa._id ?? mesa.id
 
-    setProcesando(true);
+    if (!mesaId) {
+      setAlerta({ tipo: 'error', texto: 'La mesa no tiene un identificador válido.' })
+      return
+    }
+
+    if (!window.confirm(`¿Eliminar la mesa #${mesa.numero}?`)) return
+
+    setAlerta(null)
+    setIsSubmitting(true)
+
     try {
-      await apiClient.delete(`/mesas/${mesaId}`);
-      mostrarMensaje('exito', `Mesa #${numero} eliminada correctamente`);
-      setMesas((prev) => prev.filter((m) => m._id !== mesaId));
+      await apiClient.delete(`/mesas/${mesaId}`)
+      setAlerta({ tipo: 'exito', texto: 'Mesa eliminada correctamente.' })
+      await loadMesas(salonSeleccionado)
     } catch (error) {
-      mostrarMensaje('error', error.response?.data?.message || 'No se pudo eliminar la mesa');
+      setAlerta({
+        tipo: 'error',
+        texto: getErrorMessage(error, 'No se puede eliminar esta mesa.'),
+      })
     } finally {
-      setProcesando(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
-  const abrirModalQR = (mesa) => {
-    setMesaQR(mesa);
-  };
-
-  const cerrarModalQR = () => {
-    setMesaQR(null);
-  };
-
-  const imprimirQR = () => {
-    window.print();
-  };
-
-  // URL para el código QR (apunta a la vista del cliente)
-  const getQRUrl = (token) => `${window.location.origin}/cliente/mesa/${token}`;
+  const getQRUrl = (token) => `${window.location.origin}/cliente/mesa/${token}`
 
   return (
-    <div className="gestion-mesas-container">
-      <header className="gestion-mesas-header">
-        <h2>Gestión de Mesas</h2>
-        <p>Administra la distribución de mesas y genera sus códigos QR por salón.</p>
+    <main className="gestion-mesas">
+      <header className="gestion-mesas__header">
+        <h1>Gestión de mesas</h1>
+        <p>Administra las mesas y genera sus códigos QR según el salón.</p>
       </header>
 
-      {mensaje.texto && (
-        <div className={`alert-banner ${mensaje.tipo}`}>
-          {mensaje.texto}
+      {/* Panel de Controles */}
+      <section className="gestion-mesas__panel" aria-labelledby="crear-mesa-title">
+        <h2 id="crear-mesa-title">Configuración y Creación</h2>
+
+        <div className="gestion-mesas__controls">
+          <div className="gestion-mesas__field">
+            <label htmlFor="salon-select">Salón activo</label>
+            {isLoading ? (
+              <p>Cargando salones...</p>
+            ) : (
+              <select
+                id="salon-select"
+                value={salonSeleccionado}
+                onChange={handleSalonChange}
+                disabled={isSubmitting}
+              >
+                {salones.length === 0 ? (
+                  <option value="">No hay salones disponibles</option>
+                ) : (
+                  salones.map((salon) => {
+                    const id = salon._id ?? salon.id
+                    return (
+                      <option key={id} value={id}>
+                        {salon.nombre}
+                      </option>
+                    )
+                  })
+                )}
+              </select>
+            )}
+          </div>
+
+          <form className="gestion-mesas__form" onSubmit={handleSubmit} noValidate>
+            <label htmlFor="cantidad-mesas">Agregar mesas</label>
+            <div className="gestion-mesas__form-row">
+              <input
+                id="cantidad-mesas"
+                name="cantidad"
+                type="number"
+                min="1"
+                max="50"
+                value={cantidad}
+                onChange={(e) => setCantidad(e.target.value)}
+                disabled={isSubmitting || !salonSeleccionado}
+              />
+              <button type="submit" disabled={isSubmitting || !salonSeleccionado}>
+                {isSubmitting ? 'Creando...' : 'Crear Mesas'}
+              </button>
+            </div>
+          </form>
         </div>
+      </section>
+
+      {alerta && (
+        <p className={`gestion-mesas__alert gestion-mesas__alert--${alerta.tipo}`} role="alert">
+          {alerta.texto}
+        </p>
       )}
 
-      {/* Panel Superior: Selección de Salón y Formulario */}
-      <div className="gestion-mesas-controls">
-        <div className="control-group">
-          <label htmlFor="select-salon">Salón Activo:</label>
-          {cargandoSalones ? (
-            <span className="spinner-sm">Cargando salones...</span>
-          ) : (
-            <select
-              id="select-salon"
-              value={salonSeleccionado}
-              onChange={(e) => setSalonSeleccionado(e.target.value)}
-              disabled={procesando}
-            >
-              {salones.length === 0 ? (
-                <option value="">No hay salones registrados</option>
-              ) : (
-                salones.map((s) => (
-                  <option key={s._id} value={s._id}>
-                    {s.nombre}
-                  </option>
-                ))
-              )}
-            </select>
-          )}
-        </div>
+      {/* Tarjetas de Mesas */}
+      <section className="gestion-mesas__panel" aria-labelledby="mesas-title">
+        <h2 id="mesas-title">Mesas del salón</h2>
 
-        <form className="control-group form-crear-mesas" onSubmit={handleCrearMesas}>
-          <label htmlFor="input-cantidad">Agregar Mesas:</label>
-          <div className="input-with-button">
-            <input
-              id="input-cantidad"
-              type="number"
-              min="1"
-              max="50"
-              value={cantidad}
-              onChange={(e) => setCantidad(e.target.value)}
-              disabled={procesando || !salonSeleccionado}
-            />
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={procesando || !salonSeleccionado}
-            >
-              {procesando ? 'Agregando...' : '+ Crear Mesas'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Grid de Mesas */}
-      <div className="mesas-grid-container">
         {cargandoMesas ? (
-          <div className="loading-state">Obteniendo mesas del salón...</div>
+          <p>Cargando mesas...</p>
         ) : mesas.length === 0 ? (
-          <div className="empty-state">
+          <p>
             {salonSeleccionado
-              ? 'No hay mesas registradas en este salón. ¡Agrega la primera arriba!'
-              : 'Selecciona un salón para ver sus mesas.'}
-          </div>
+              ? 'No hay mesas creadas en este salón.'
+              : 'Selecciona un salón para revisar sus mesas.'}
+          </p>
         ) : (
-          <div className="mesas-grid">
-            {mesas.map((mesa) => (
-              <div key={mesa._id} className="mesa-card">
-                <div className="mesa-card-header">
-                  <span className="mesa-numero">Mesa #{mesa.numero}</span>
-                  <span className={`badge-estado estado-${mesa.estado?.toLowerCase()}`}>
-                    {mesa.estado}
-                  </span>
-                </div>
+          <div className="gestion-mesas__grid">
+            {mesas.map((mesa) => {
+              const mesaId = mesa._id ?? mesa.id
+              return (
+                <div key={mesaId} className="gestion-mesas__card">
+                  <div className="gestion-mesas__card-header">
+                    <span className="gestion-mesas__card-title">Mesa #{mesa.numero}</span>
+                    <span className={`gestion-mesas__badge gestion-mesas__badge--${mesa.estado?.toLowerCase()}`}>
+                      {mesa.estado}
+                    </span>
+                  </div>
 
-                <div className="mesa-card-body">
-                  <div className="qr-preview" onClick={() => abrirModalQR(mesa)}>
+                  <div className="gestion-mesas__qr-preview" onClick={() => setMesaQR(mesa)}>
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
                         getQRUrl(mesa.qr_token)
                       )}`}
                       alt={`QR Mesa ${mesa.numero}`}
                     />
-                    <small>Haz clic para ampliar</small>
+                    <small>Ver ampliado</small>
+                  </div>
+
+                  <div className="gestion-mesas__card-actions">
+                    <button
+                      type="button"
+                      className="gestion-mesas__btn-secondary"
+                      onClick={() => setMesaQR(mesa)}
+                    >
+                      Ver QR
+                    </button>
+                    <button
+                      type="button"
+                      className="gestion-mesas__delete"
+                      onClick={() => handleDelete(mesa)}
+                      disabled={isSubmitting || mesa.estado !== 'Libre'}
+                      title={mesa.estado !== 'Libre' ? 'Solo puedes borrar mesas libres' : ''}
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 </div>
-
-                <div className="mesa-card-actions">
-                  <button
-                    className="btn-secondary btn-sm"
-                    onClick={() => abrirModalQR(mesa)}
-                  >
-                    🔍 Ver QR
-                  </button>
-                  <button
-                    className="btn-danger btn-sm"
-                    onClick={() => handleEliminarMesa(mesa._id, mesa.numero)}
-                    disabled={procesando || mesa.estado !== 'Libre'}
-                    title={mesa.estado !== 'Libre' ? 'Solo puedes eliminar mesas libres' : 'Eliminar mesa'}
-                  >
-                    🗑️ Borrar
-                  </button>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Modal para Visualización e Impresión de Código QR */}
+      {/* Modal QR */}
       {mesaQR && (
-        <div className="modal-overlay" onClick={cerrarModalQR}>
-          <div className="modal-content print-area" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close no-print" onClick={cerrarModalQR}>
+        <div className="gestion-mesas__modal-overlay" onClick={() => setMesaQR(null)}>
+          <div
+            className="gestion-mesas__modal-content print-area"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="gestion-mesas__modal-close no-print"
+              onClick={() => setMesaQR(null)}
+            >
               ×
             </button>
-            
-            <div className="qr-modal-body">
-              <h3>Mesa #{mesaQR.numero}</h3>
-              <p className="qr-salon-name">
-                {salones.find((s) => s._id === salonSeleccionado)?.nombre || 'Salón'}
-              </p>
+            <h3>Mesa #{mesaQR.numero}</h3>
+            <p className="no-print">Escanea para acceder a la carta y realizar pedidos.</p>
 
-              <div className="qr-large-container">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-                    getQRUrl(mesaQR.qr_token)
-                  )}`}
-                  alt={`QR Mesa ${mesaQR.numero}`}
-                />
-              </div>
-
-              <p className="qr-instruction">
-                Escanea este código QR con tu celular para revisar la carta y realizar pedidos.
-              </p>
+            <div className="gestion-mesas__qr-large">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
+                  getQRUrl(mesaQR.qr_token)
+                )}`}
+                alt={`QR Mesa ${mesaQR.numero}`}
+              />
             </div>
 
-            <div className="modal-actions no-print">
-              <button className="btn-primary" onClick={imprimirQR}>
-                🖨️ Imprimir QR
+            <div className="gestion-mesas__modal-actions no-print">
+              <button type="button" onClick={() => window.print()}>
+                Imprimir QR
               </button>
-              <button className="btn-secondary" onClick={cerrarModalQR}>
+              <button
+                type="button"
+                className="gestion-mesas__btn-secondary"
+                onClick={() => setMesaQR(null)}
+              >
                 Cerrar
               </button>
             </div>
           </div>
         </div>
       )}
-    </div>
-  );
-};
+    </main>
+  )
+}
 
-export default GestionMesas;
+export default GestionMesas

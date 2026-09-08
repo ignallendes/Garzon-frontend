@@ -23,6 +23,9 @@ function Navbar() {
             <NavLink to="/admin/salones" className={({ isActive }) => `navbar__link${isActive ? ' navbar__link--active' : ''}`}>
               Gestión de Salones
             </NavLink>
+            <NavLink to="/admin/mesas" className={({ isActive }) => `navbar__link${isActive ? ' navbar__link--active' : ''}`}>
+              Gestión de Mesas
+            </NavLink>
           </>
         )}
       </nav>

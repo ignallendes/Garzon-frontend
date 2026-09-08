@@ -10,6 +10,7 @@ import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
 import UsuariosView from './views/usuarios/UsuariosView';
 import GestionSalones from './views/admin/GestionSalones';
+import GestionMesas from './views/admin/GestionMesas';
 
 // Componente Wrapper para Proteger Rutas Privadas
 function ProtectedRoute({ children }) {
@@ -76,6 +77,17 @@ export default function App() {
             <ProtectedRoute>
               <AdminRoute>
                 <GestionSalones />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+      
+        <Route
+          path="/admin/mesas"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <GestionMesas />
               </AdminRoute>
             </ProtectedRoute>
           }
