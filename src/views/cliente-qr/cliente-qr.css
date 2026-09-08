@@ -1,0 +1,62 @@
+.cliente-qr {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+  padding: 1.25rem;
+  background: linear-gradient(160deg, #eff6ff, #f8fafc);
+  color: #1e293b;
+}
+
+.cliente-qr__card {
+  box-sizing: border-box;
+  width: min(100%, 30rem);
+  padding: 2rem 1.5rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 16px 36px rgb(15 23 42 / 13%);
+  text-align: center;
+}
+
+.cliente-qr__eyebrow,
+.cliente-qr__salon,
+.cliente-qr__description {
+  margin: 0;
+}
+
+.cliente-qr__eyebrow {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cliente-qr h1 {
+  margin: 0.4rem 0;
+  color: #0f172a;
+  font-size: clamp(2rem, 10vw, 3rem);
+}
+
+.cliente-qr__salon {
+  color: #2563eb;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.cliente-qr__description {
+  margin: 1.75rem 0 1rem;
+  color: #475569;
+}
+
+.cliente-qr__actions {
+  display: grid;
+  gap: 1rem;
+}
+
+.cliente-qr__card--error h1 {
+  color: #b91c1c;
+}
+
+.cliente-qr__card--error p {
+  margin: 0;
+  color: #475569;
+}

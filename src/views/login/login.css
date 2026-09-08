@@ -1,0 +1,27 @@
+.login-view {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 1.5rem;
+  background: #f4f7fb;
+}
+
+.login-view__card {
+  box-sizing: border-box;
+  width: min(100%, 26rem);
+  padding: 2rem;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 12px 30px rgb(15 23 42 / 12%);
+}
+
+.login-view h1 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.8rem;
+}
+
+.login-view__description {
+  margin: 0.5rem 0 1.5rem;
+  color: #64748b;
+}

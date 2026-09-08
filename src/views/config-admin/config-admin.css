@@ -1,0 +1,151 @@
+.config-admin {
+  max-width: 75rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: #1e293b;
+}
+
+.config-admin__header,
+.config-admin__section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.config-admin__header {
+  margin-bottom: 1.5rem;
+}
+
+.config-admin__header h1,
+.config-admin h2 {
+  margin: 0;
+}
+
+.config-admin__header p {
+  margin: 0.4rem 0 0;
+  color: #64748b;
+}
+
+.config-admin__print-button {
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: #0f766e;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.config-admin__print-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.config-admin__forms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.config-admin__panel,
+.config-admin__qr-section {
+  padding: 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.config-admin__panel h2 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.config-admin__salones {
+  margin-bottom: 1rem;
+}
+
+.config-admin__selector {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 24rem;
+  font-weight: 600;
+}
+
+.config-admin__selector select {
+  padding: 0.75rem;
+  border: 1px solid #94a3b8;
+  border-radius: 0.4rem;
+  background: #fff;
+  font: inherit;
+}
+
+.config-admin__qr-section {
+  min-height: 12rem;
+}
+
+.config-admin__section-heading {
+  margin-bottom: 1rem;
+}
+
+.config-admin__section-heading span {
+  color: #64748b;
+}
+
+.config-admin__qr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.config-admin__qr-grid .qr-card {
+  max-width: none;
+}
+
+.config-admin__error {
+  margin: 0 0 1rem;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+@media (max-width: 42rem) {
+  .config-admin {
+    padding: 1rem;
+  }
+
+  .config-admin__header,
+  .config-admin__section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .config-admin__forms {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .config-admin__header,
+  .config-admin__forms,
+  .config-admin__salones,
+  .config-admin__section-heading,
+  .config-admin__error {
+    display: none;
+  }
+
+  .config-admin,
+  .config-admin__qr-section {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .config-admin__qr-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

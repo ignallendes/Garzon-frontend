@@ -1,0 +1,62 @@
+.qr-card {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  max-width: 18rem;
+  padding: 1.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #0f172a;
+  text-align: center;
+}
+
+.qr-card__title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.qr-card__code {
+  width: min(100%, 13.75rem);
+  height: auto;
+}
+
+.qr-card__url {
+  max-width: 100%;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #475569;
+  font-size: 0.8rem;
+}
+
+.qr-card__print-button {
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .qr-card,
+  .qr-card * {
+    visibility: visible;
+  }
+
+  .qr-card {
+    break-inside: avoid;
+    border: 1px solid #000;
+    box-shadow: none;
+  }
+
+  .qr-card__print-button {
+    display: none;
+  }
+}
