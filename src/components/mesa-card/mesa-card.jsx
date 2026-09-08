@@ -7,7 +7,7 @@ const estados = {
   cuenta: { className: 'mesa-card--cuenta', label: 'Cuenta' },
 }
 
-function MesaCard({ numeroMesa, estado = 'Libre', onClick }) {
+function MesaCard({ numero, estado = 'Libre', onClick }) {
   const estadoNormalizado = String(estado).toLowerCase()
   const estadoActual = estados[estadoNormalizado] ?? estados.libre
 
@@ -16,9 +16,9 @@ function MesaCard({ numeroMesa, estado = 'Libre', onClick }) {
       className={`mesa-card ${estadoActual.className}`}
       type="button"
       onClick={onClick}
-      aria-label={`Mesa ${numeroMesa}, estado: ${estadoActual.label}`}
+      aria-label={`Mesa ${numero}, estado: ${estadoActual.label}`}
     >
-      <span className="mesa-card__number">Mesa {numeroMesa}</span>
+      <span className="mesa-card__number">Mesa {numero}</span>
       <span className="mesa-card__state">{estadoActual.label}</span>
     </button>
   )

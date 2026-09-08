@@ -29,7 +29,13 @@ function Dashboard() {
         if (salonesCargados.length > 0) {
           // 💡 SOPORTE PARA _id (MongoDB) e id
           const idInicial = salonesCargados[0]._id ?? salonesCargados[0].id
-          setSelectedSalonId(String(idInicial))
+
+          if (idInicial) {
+            setSelectedSalonId(String(idInicial))
+          } else {
+            setIsLoading(false)
+            setError('El salón recibido no tiene un identificador válido.')
+          }
         } else {
           setIsLoading(false)
         }
@@ -83,7 +89,7 @@ function Dashboard() {
   useEffect(() => {
     const handleCambioEstado = (payload) => {
       const mesaActualizada = payload?.mesa ?? payload
-      const mesaId = mesaActualizada?._id ?? mesaActualizada?.id ?? payload?.mesaId
+      const mesaId = mesaActualizada?._id ?? mesaActualizada?.id ?? payload?.mesaId ?? payload?.mesa ?? payload?.idMesa
       const estado = mesaActualizada?.estado ?? payload?.nuevoEstado
 
       if (!mesaId || !estado) return
@@ -156,7 +162,7 @@ function Dashboard() {
             {mesas.map((mesa) => (
               <MesaCard
                 key={mesa._id ?? mesa.id}
-                numeroMesa={mesa.numeroMesa ?? mesa.numero}
+                numero={mesa.numero}
                 estado={mesa.estado}
                 onClick={() => setSelectedMesa(mesa)}
               />

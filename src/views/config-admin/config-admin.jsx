@@ -28,7 +28,7 @@ function ConfigAdmin() {
     setIsLoadingMesas(true)
 
     try {
-      const { data } = await apiClient.get(`/mesas/salon/${salonId}`)
+      const { data } = await apiClient.get(`/mesas/${salonId}`)
       setMesas(Array.isArray(data) ? data : data.mesas ?? [])
     } catch {
       setMesas([])
@@ -81,7 +81,9 @@ function ConfigAdmin() {
     window.print()
   }
 
-  const selectedSalon = salones.find((salon) => String(salon.id) === selectedSalonId)
+  const selectedSalon = salones.find(
+    (salon) => String(salon._id ?? salon.id) === selectedSalonId,
+  )
 
   return (
     <main className="config-admin">
@@ -108,7 +110,7 @@ function ConfigAdmin() {
           <SalonForm onSalonCreated={loadSalones} />
         </article>
         <article className="config-admin__panel">
-          <h2>Crear mesas</h2>
+          <h2>Crear mesa</h2>
           <MesaMasivaForm
             salones={salones}
             onMesasCreated={() => {
@@ -130,7 +132,7 @@ function ConfigAdmin() {
             <select id="salon-selector" value={selectedSalonId} onChange={handleSalonChange}>
               <option value="">Selecciona un salón</option>
               {salones.map((salon) => (
-                <option key={salon.id} value={salon.id}>
+                <option key={salon._id ?? salon.id} value={salon._id ?? salon.id}>
                   {salon.nombre}
                 </option>
               ))}
@@ -156,8 +158,8 @@ function ConfigAdmin() {
           <div className="config-admin__qr-grid">
             {mesas.map((mesa) => (
               <QrCard
-                key={mesa.id}
-                numeroMesa={mesa.numeroMesa ?? mesa.numero}
+                key={mesa._id ?? mesa.id}
+                numero={mesa.numero}
                 qr_token={mesa.qr_token}
               />
             ))}

@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiClient } from '../../api/apiClient'
 import LoginForm from '../../components/login-form/login-form'
+import { useAuth } from '../../context/useAuth'
 import './login.css'
 
 function Login() {
   const navigate = useNavigate()
+  const { setUsuario } = useAuth()
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -19,14 +21,15 @@ function Login() {
 
     try {
       const { data } = await apiClient.post('/auth/login', credentials)
-      const { token, usuario } = data
+      const { token } = data
+      const usuario = data.usuario ?? data.user
 
       if (!token || !usuario) {
         throw new Error('La respuesta de autenticación es inválida.')
       }
 
       localStorage.setItem('token', token)
-      localStorage.setItem('usuario', JSON.stringify(usuario))
+      setUsuario(usuario)
       navigate('/dashboard', { replace: true })
     } catch {
       setError('Credenciales inválidas.')

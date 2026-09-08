@@ -37,15 +37,18 @@ function ClienteQr() {
   }, [qrToken])
 
   const enviarSolicitud = async (estado) => {
-    if (!mesa?.id) {
+    const mesaId = mesa?._id ?? mesa?.id
+
+    if (!mesaId) {
       throw new Error('La mesa no está disponible.')
     }
 
-    const { data } = await apiClient.patch(`/mesas/${mesa.id}/estado`, { estado })
+    const { data } = await apiClient.patch(`/mesas/${mesaId}/estado`, { estado })
+    const mesaActualizada = data?.mesa ?? data
     setMesa((mesaActual) => ({
       ...mesaActual,
-      ...data,
-      estado: data?.estado ?? estado,
+      ...mesaActualizada,
+      estado: mesaActualizada?.estado ?? estado,
     }))
   }
 
@@ -64,14 +67,14 @@ function ClienteQr() {
     )
   }
 
-  const numeroMesa = mesa.numeroMesa ?? mesa.numero
+  const numero = mesa.numero
   const nombreSalon = mesa.salon?.nombre ?? mesa.salonNombre ?? 'Salón'
 
   return (
     <main className="cliente-qr">
       <section className="cliente-qr__card" aria-labelledby="cliente-qr-title">
         <p className="cliente-qr__eyebrow">Estás en</p>
-        <h1 id="cliente-qr-title">Mesa {numeroMesa}</h1>
+        <h1 id="cliente-qr-title">Mesa {numero}</h1>
         <p className="cliente-qr__salon">{nombreSalon}</p>
         <p className="cliente-qr__description">¿Necesitas algo? Estamos para ayudarte.</p>
 

@@ -22,8 +22,13 @@ function MesaActionModal({ mesa, onClose, onEstadoActualizado }) {
     try {
       // Usamos mesaId que garantiza el _id de MongoDB
       const { data } = await apiClient.patch(`/mesas/${mesaId}/estado`, { estado })
-      
-      const mesaActualizada = { ...mesa, ...data, estado: data?.estado ?? estado }
+
+      const respuestaMesa = data?.mesa ?? data
+      const mesaActualizada = {
+        ...mesa,
+        ...respuestaMesa,
+        estado: respuestaMesa?.estado ?? estado,
+      }
       onEstadoActualizado?.(mesaActualizada)
       onClose?.()
     } catch (err) {
@@ -44,7 +49,7 @@ function MesaActionModal({ mesa, onClose, onEstadoActualizado }) {
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="mesa-action-modal__header">
-          <h2 id="mesa-action-title">Mesa {mesa.numeroMesa ?? mesa.numero}</h2>
+          <h2 id="mesa-action-title">Mesa {mesa.numero}</h2>
           <button
             className="mesa-action-modal__close"
             type="button"

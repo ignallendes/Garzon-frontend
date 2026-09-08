@@ -1,7 +1,7 @@
 import { QRCodeSVG } from 'qrcode.react'
 import './qr-card.css'
 
-function QrCard({ numeroMesa, qr_token }) {
+function QrCard({ numero, qr_token }) {
   const frontendUrl = import.meta.env.VITE_FRONTEND_URL || window.location.origin
   const qrUrl = `${frontendUrl.replace(/\/$/, '')}/qr/${qr_token}`
 
@@ -11,14 +11,14 @@ function QrCard({ numeroMesa, qr_token }) {
 
   return (
     <article className="qr-card">
-      <h2 className="qr-card__title">Mesa {numeroMesa}</h2>
+      <h2 className="qr-card__title">Mesa {numero}</h2>
       <QRCodeSVG
         className="qr-card__code"
         value={qrUrl}
         size={220}
         level="M"
         includeMargin
-        aria-label={`Código QR de la mesa ${numeroMesa}`}
+        aria-label={`Código QR de la mesa ${numero}`}
       />
       <p className="qr-card__url">{qrUrl}</p>
       <button className="qr-card__print-button" type="button" onClick={handlePrint}>

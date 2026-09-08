@@ -5,6 +5,10 @@ import LoginView from './views/login/login';
 import DashboardView from './views/dashboard/dashboard';
 import ConfigAdminView from './views/config-admin/config-admin';
 import ClienteQrView from './views/cliente-qr/cliente-qr';
+import Navbar from './components/navbar/Navbar';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
+import UsuariosView from './views/usuarios/UsuariosView';
 
 // Componente Wrapper para Proteger Rutas Privadas
 function ProtectedRoute({ children }) {
@@ -15,13 +19,20 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <><Navbar />{children}</>;
+}
+
+function AdminRoute({ children }) {
+  const { isAdmin } = useAuth();
+
+  return isAdmin ? children : <Navigate to="/dashboard" replace />;
 }
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <AuthProvider>
+        <Routes>
         {/* ----- RUTA PÚBLICA DE AUTENTICACIÓN ----- */}
         <Route path="/login" element={<LoginView />} />
 
@@ -47,13 +58,25 @@ export default function App() {
           }
         />
 
+        <Route
+          path="/usuarios"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <UsuariosView />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+
         {/* ----- REDIRECCIONES POR DEFECTO ----- */}
         {/* Redirige la raíz al dashboard (si está autenticado, irá al dashboard; si no, ProtectedRoute lo manda al login) */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
         {/* Captura cualquier otra URL no definida y redirige a la raíz */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
