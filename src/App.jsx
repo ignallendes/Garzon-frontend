@@ -9,6 +9,7 @@ import Navbar from './components/navbar/Navbar';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
 import UsuariosView from './views/usuarios/UsuariosView';
+import GestionSalones from './views/admin/GestionSalones';
 
 // Componente Wrapper para Proteger Rutas Privadas
 function ProtectedRoute({ children }) {
@@ -64,6 +65,17 @@ export default function App() {
             <ProtectedRoute>
               <AdminRoute>
                 <UsuariosView />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/salones"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <GestionSalones />
               </AdminRoute>
             </ProtectedRoute>
           }

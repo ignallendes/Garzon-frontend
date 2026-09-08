@@ -16,9 +16,14 @@ function Navbar() {
           Mesas
         </NavLink>
         {isAdmin && (
-          <NavLink to="/usuarios" className={({ isActive }) => `navbar__link${isActive ? ' navbar__link--active' : ''}`}>
-            Gestión Usuarios
-          </NavLink>
+          <>
+            <NavLink to="/usuarios" className={({ isActive }) => `navbar__link${isActive ? ' navbar__link--active' : ''}`}>
+              Gestión Usuarios
+            </NavLink>
+            <NavLink to="/admin/salones" className={({ isActive }) => `navbar__link${isActive ? ' navbar__link--active' : ''}`}>
+              Gestión de Salones
+            </NavLink>
+          </>
         )}
       </nav>
       <button className="navbar__logout" type="button" onClick={logout}>
