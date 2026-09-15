@@ -5,6 +5,7 @@ import LoginView from './views/login/login';
 import DashboardView from './views/dashboard/dashboard';
 import ConfigAdminView from './views/config-admin/config-admin';
 import ClienteQrView from './views/cliente-qr/cliente-qr';
+import ClienteMesa from './views/cliente/ClienteMesa';
 import Navbar from './components/navbar/Navbar';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
@@ -40,6 +41,7 @@ export default function App() {
 
         {/* ----- RUTA PÚBLICA PARA CLIENTES (ESCÁNER QR) ----- */}
         <Route path="/qr/:qr_token" element={<ClienteQrView />} />
+        <Route path="/cliente/mesa/:token" element={<ClienteMesa />} />
 
         {/* ----- RUTAS PROTEGIDAS (GARZONES / CAJA / ADMIN) ----- */}
         <Route

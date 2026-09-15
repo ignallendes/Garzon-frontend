@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true, // Permite probar desde el celular en la misma red Wi-Fi
+    allowedHosts: true,
     proxy: {
       // Redirige llamadas HTTP al backend
       '/api': {
