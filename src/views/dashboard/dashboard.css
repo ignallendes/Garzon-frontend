@@ -41,6 +41,29 @@
   width: 100%;
 }
 
+.dashboard .parpadeo-alerta {
+  animation: parpadeo-alerta 0.9s ease-in-out infinite !important;
+}
+
+@keyframes parpadeo-alerta {
+  0%, 100% {
+    background-color: #fff7ed;
+    border-color: #ea580c;
+    box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.25);
+  }
+  50% {
+    background-color: #fee2e2;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 0.5rem rgba(220, 38, 38, 0.32);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard .parpadeo-alerta {
+    animation: none !important;
+  }
+}
+
 .dashboard__error {
   margin: 0 0 1rem;
   color: #b91c1c;
