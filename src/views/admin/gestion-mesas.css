@@ -1,0 +1,273 @@
+.gestion-mesas {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: #1e293b;
+}
+
+.gestion-mesas__header {
+  margin-bottom: 1.5rem;
+}
+
+.gestion-mesas__header h1,
+.gestion-mesas__header p,
+.gestion-mesas__panel h2 {
+  margin: 0;
+}
+
+.gestion-mesas__header p {
+  margin-top: 0.4rem;
+  color: #64748b;
+}
+
+.gestion-mesas__panel {
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.gestion-mesas__panel h2 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+/* Controles superiores (Salón selector + Crear mesas) */
+.gestion-mesas__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.gestion-mesas__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-weight: 600;
+  flex: 1;
+  min-width: 14rem;
+}
+
+.gestion-mesas__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-weight: 600;
+  flex: 1;
+  min-width: 14rem;
+}
+
+.gestion-mesas__form-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.gestion-mesas select,
+.gestion-mesas input {
+  min-width: 0;
+  flex: 1;
+  padding: 0.7rem;
+  border: 1px solid #94a3b8;
+  border-radius: 0.4rem;
+  font: inherit;
+  background-color: #fff;
+}
+
+.gestion-mesas button {
+  min-height: 2.75rem;
+  padding: 0.65rem 0.9rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.gestion-mesas button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.gestion-mesas__btn-secondary {
+  background: #64748b !important;
+}
+
+.gestion-mesas__delete {
+  background: #b91c1c !important;
+}
+
+.gestion-mesas__alert {
+  margin: 0 0 1rem;
+  font-weight: 600;
+}
+
+.gestion-mesas__alert--exito {
+  color: #15803d;
+}
+
+.gestion-mesas__alert--error {
+  color: #b91c1c;
+}
+
+/* Grid de tarjetas de mesas */
+.gestion-mesas__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 1rem;
+}
+
+.gestion-mesas__card {
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.gestion-mesas__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gestion-mesas__card-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.gestion-mesas__badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.gestion-mesas__badge--libre {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.gestion-mesas__badge--ocupada {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Vista previa del QR */
+.gestion-mesas__qr-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0.8rem 0;
+  cursor: pointer;
+}
+
+.gestion-mesas__qr-preview img {
+  width: 6.5rem;
+  height: 6.5rem;
+}
+
+.gestion-mesas__qr-preview small {
+  margin-top: 0.25rem;
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.gestion-mesas__card-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.gestion-mesas__card-actions button {
+  flex: 1;
+  min-height: auto;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+/* Modal e Impresión QR */
+.gestion-mesas__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+  padding: 1rem;
+}
+
+.gestion-mesas__modal-content {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  position: relative;
+  max-width: 22rem;
+  width: 100%;
+}
+
+.gestion-mesas__modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  background: none !important;
+  color: #64748b !important;
+  font-size: 1.5rem;
+  padding: 0 !important;
+  min-height: auto !important;
+}
+
+.gestion-mesas__qr-large img {
+  width: 12rem;
+  height: 12rem;
+  margin: 1rem 0;
+}
+
+.gestion-mesas__modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+@media (max-width: 36rem) {
+  .gestion-mesas {
+    padding: 1rem;
+  }
+
+  .gestion-mesas__controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .gestion-mesas__form-row {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translateX(-50%);
+  }
+  .no-print {
+    display: none !important;
+  }
+}
