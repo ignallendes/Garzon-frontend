@@ -1,14 +1,26 @@
-import { io } from 'socket.io-client'
+import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const DEFAULT_SOCKET_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-export const socketClient = io(SOCKET_URL, {
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-  reconnectionDelayMax: 10000,
-  randomizationFactor: 0.5,
-  timeout: 5000,
-})
+export let socketClient = null;
 
-export default socketClient
+export const initSocket = (url) => {
+  const targetUrl = url || DEFAULT_SOCKET_URL;
+
+  if (socketClient) {
+    socketClient.disconnect();
+  }
+
+  socketClient = io(targetUrl, {
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 10000,
+    randomizationFactor: 0.5,
+    timeout: 5000,
+  });
+
+  return socketClient;
+};
+
+export default socketClient;
